@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emotional Analysis Results</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <img src="{{ url_for('video_feed') }}" width="640" />
+    <div style="width: 750px; height: 1200px;">
+        <canvas id="emotionChart" ></canvas>
+    </div>
+    <script>
+        var initialEmotions = JSON.parse('{{ latest_emotions }}');
+        var ctx = document.getElementById('emotionChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(initialEmotions),
+                datasets: [{
+                    label: 'Emotional Analysis Results',
+                    data: Object.values(initialEmotions),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        async function fetchEmotions() {
+            const response = await fetch('/emotions');
+            const data = await response.json();
+            chart.data.labels = Object.keys(data);
+            chart.data.datasets.forEach((dataset) => {
+                dataset.data = Object.values(data);
+            });
+            chart.update();
+        }
+        setInterval(fetchEmotions, 2000); 
+    </script>
+</body>
+</html>
